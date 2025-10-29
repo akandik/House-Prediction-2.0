@@ -82,6 +82,21 @@
       <label>Floors</label>
       <input type="number" step="0.5" name="floors" min="1" required />
 
+      <label>Waterfront (0 = No, 1 = Yes)</label>
+      <select name="waterfront" required>
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+      </select>
+
+      <label>View (0–4)</label>
+      <select name="view" required>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+
       <label>Condition (1–5)</label>
       <select name="condition" required>
         <option value="1">1 (Poor)</option>
@@ -90,6 +105,15 @@
         <option value="4">4</option>
         <option value="5">5 (Excellent)</option>
       </select>
+
+      <label>Grade (1–13)</label>
+      <input type="number" name="grade" min="1" max="13" required />
+
+      <label>Year Built</label>
+      <input type="number" name="yr_built" min="1900" max="2025" required />
+
+      <label>Year Renovated (0 if never)</label>
+      <input type="number" name="yr_renovated" min="0" max="2025" required />
 
       <label>Living Area (sqft)</label>
       <input type="number" name="sqft_living" required />
@@ -107,6 +131,7 @@
   </div>
 
   <script>
+    // 👇 CHANGE THIS TO YOUR DEPLOYED FLASK URL
     const API_URL = "https://your-backend-url.com/predict";
 
     const form = document.getElementById("predictForm");
