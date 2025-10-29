@@ -81,16 +81,36 @@
 
         <form id="predictionForm">
             <label for="beds">Bedrooms:</label>
-            <select id="beds" name="beds"></select>
+            <select id="beds" name="beds" required>
+                <option value="" disabled selected>Select number of bedrooms</option>
+                {% for b in bedrooms %}
+                    <option value="{{ b }}">{{ b }}</option>
+                {% endfor %}
+            </select>
 
             <label for="baths">Bathrooms:</label>
-            <select id="baths" name="baths"></select>
+            <select id="baths" name="baths" required>
+                <option value="" disabled selected>Select number of bathrooms</option>
+                {% for b in bathrooms %}
+                    <option value="{{ b }}">{{ b }}</option>
+                {% endfor %}
+            </select>
 
             <label for="size">Size (sqft):</label>
-            <select id="size" name="size"></select>
+            <select id="size" name="size" required>
+                <option value="" disabled selected>Select house size</option>
+                {% for s in sizes %}
+                    <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+            </select>
 
             <label for="zip_code">Zip Code:</label>
-            <select id="zip_code" name="zip_code"></select>
+            <select id="zip_code" name="zip_code" required>
+                <option value="" disabled selected>Select zip code</option>
+                {% for z in zip_codes %}
+                    <option value="{{ z }}">{{ z }}</option>
+                {% endfor %}
+            </select>
 
             <button type="button" onclick="sendData()">Predict Price</button>
         </form>
@@ -103,33 +123,6 @@
     </footer>
 
     <script>
-        // Generic function to populate dropdowns
-        async function fetchOptions(endpoint, dropdownId, placeholder) {
-            try {
-                const response = await fetch(endpoint);
-                const data = await response.json();
-                const dropdown = document.getElementById(dropdownId);
-                dropdown.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
-                data.forEach(opt => {
-                    const option = document.createElement('option');
-                    option.value = opt;
-                    option.textContent = opt;
-                    dropdown.appendChild(option);
-                });
-            } catch (err) {
-                console.error(`Error loading ${dropdownId}:`, err);
-            }
-        }
-
-        // Load dropdowns on page load
-        window.onload = () => {
-            fetchOptions('/bedrooms', 'beds', 'Select number of bedrooms');
-            fetchOptions('/bathrooms', 'baths', 'Select number of bathrooms');
-            fetchOptions('/sizes', 'size', 'Select house size');
-            fetchOptions('/zip_codes', 'zip_code', 'Select zip code');
-        };
-
-        // Send user input to backend and display prediction
         async function sendData() {
             const form = document.getElementById('predictionForm');
             const formData = new FormData(form);
@@ -139,12 +132,18 @@
                     method: 'POST',
                     body: formData
                 });
-                const result = await response.json(); // Expect JSON like {price: 12345}
-                document.getElementById("predictedPrice").innerHTML =
-                    "Predicted Price: ₹ " + Number(result.price).toLocaleString();
+                const result = await response.json();
+
+                if (result.price) {
+                    document.getElementById("predictedPrice").innerHTML =
+                        "Predicted Price: ₹ " + Number(result.price).toLocaleString();
+                } else {
+                    document.getElementById("predictedPrice").innerHTML =
+                        "⚠️ " + (result.error || "Could not predict price.");
+                }
             } catch (error) {
                 document.getElementById("predictedPrice").innerHTML =
-                    "⚠️ Error getting prediction. Please try again.";
+                    "⚠️ Error contacting server.";
                 console.error(error);
             }
         }
