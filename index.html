@@ -1,321 +1,166 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>House Price Prediction</title>
-  <meta name="description" content="Predict house prices using a trained Ridge model.">
   <style>
-    /* Reset-ish */
-    *,*::before,*::after{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-      background: linear-gradient(180deg,#f7fafc 0%, #e8f0f8 100%);
-      color:#0f172a;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      line-height:1.5;
-      padding:24px;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f9fafb, #eef2ff);
+      margin: 0;
+      padding: 0;
     }
-
-    .container{
-      max-width:900px;
-      margin:24px auto;
-      padding:20px;
+    .container {
+      max-width: 850px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      padding: 30px;
     }
-
-    header{
-      text-align:center;
-      margin-bottom:18px;
+    h1 {
+      text-align: center;
+      color: #111827;
     }
-
-    .card{
-      background: #ffffff;
-      border-radius:12px;
-      box-shadow: 0 8px 20px rgba(13,38,59,0.08);
-      padding:20px;
-      overflow:hidden;
-    }
-
-    h1{
-      margin:0 0 8px 0;
-      font-size:1.6rem;
-      letter-spacing: -0.01em;
-    }
-    p.lead{
-      margin:0;
-      color:#334155;
-      opacity:.9;
-    }
-
-    form{
-      margin-top:18px;
-      display:grid;
-      gap:14px;
+    form {
+      display: grid;
       grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
-
-    label{
-      display:block;
-      font-size:.9rem;
-      color:#0f172a;
-      margin-bottom:6px;
+    label {
+      font-weight: 600;
+      color: #374151;
     }
-
-    .field{
-      display:flex;
-      flex-direction:column;
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background-color: #f8fafc;
+      font-size: 15px;
     }
-
-    select, input[type="number"], input[type="text"]{
-      padding:10px 12px;
-      border-radius:8px;
-      border:1px solid #e6edf3;
-      font-size:0.95rem;
-      outline: none;
-      background: #fbfdff;
+    button {
+      grid-column: span 2;
+      background-color: #2563eb;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
     }
-    select:focus, input:focus{
-      border-color:#7dd3fc;
-      box-shadow:0 0 0 3px rgba(125,211,252,0.12);
+    button:hover {
+      background-color: #1d4ed8;
     }
-
-    .full {
-      grid-column: 1 / -1;
+    .result {
+      margin-top: 20px;
+      grid-column: span 2;
+      text-align: center;
+      font-weight: bold;
+      color: #1e3a8a;
+      font-size: 1.2rem;
     }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:flex-end;
-    }
-
-    button{
-      background:#0f172a;
-      color:white;
-      border:none;
-      padding:10px 16px;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    button[disabled]{opacity:.6;cursor:default}
-
-    .result{
-      margin-top:14px;
-      padding:12px;
-      border-radius:10px;
-      background:linear-gradient(180deg,#f8fafc,#f1f5f9);
-      border:1px solid #e2e8f0;
-      color:#0f172a;
-      font-weight:600;
-    }
-
-    .muted{color:#64748b;font-weight:500;font-size:.95rem}
-
-    .helper {
-      font-size:0.85rem;
-      color:#475569;
-    }
-
-    /* spinner */
-    .spinner{
-      width:16px;height:16px;border-radius:50%;
-      border:2px solid rgba(255,255,255,0.35);
-      border-top-color:rgba(255,255,255,0.98);
-      animation:spin 1s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    footer{
-      text-align:center;
-      margin-top:18px;
-      color:#64748b;
-      font-size:0.88rem;
-    }
-
-    /* Responsive */
-    @media (max-width:720px){
-      form{grid-template-columns: 1fr}
-      .actions{justify-content:stretch;flex-direction:column-reverse}
-      button{width:100%}
-    }
-
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>House Price Prediction</h1>
-      <p class="lead">Enter house details and get a predicted price from your trained Ridge model.</p>
-    </header>
+    <h1>🏠 House Price Prediction</h1>
+    <form id="predictForm">
 
-    <main class="card" role="main" aria-labelledby="main-heading">
-      <h2 id="main-heading" style="font-size:1.05rem;margin:0 0 10px 0">Predict a price</h2>
+      <label>Bedrooms</label>
+      <input type="number" name="bedrooms" min="0" required>
 
-      <form id="predictionForm" autocomplete="off" novalidate>
-        <div class="field">
-          <label for="beds">Bedrooms</label>
-          <select id="beds" name="beds" required aria-required="true">
-            <option value="" disabled selected>Select bedrooms</option>
-            {% for bedroom in bedrooms %}
-              <option value="{{ bedroom }}">{{ bedroom }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <label>Bathrooms</label>
+      <input type="number" step="0.25" name="bathrooms" min="0" required>
 
-        <div class="field">
-          <label for="baths">Bathrooms</label>
-          <select id="baths" name="baths" required aria-required="true">
-            <option value="" disabled selected>Select bathrooms</option>
-            {% for bathroom in bathrooms %}
-              <option value="{{ bathroom }}">{{ bathroom }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <label>Floors</label>
+      <input type="number" step="0.5" name="floors" min="1" required>
 
-        <div class="field">
-          <label for="size">Size (sqft)</label>
-          <select id="size" name="size" required aria-required="true">
-            <option value="" disabled selected>Select size (sqft)</option>
-            {% for house_size in sizes %}
-              <option value="{{ house_size }}">{{ house_size }}</option>
-            {% endfor %}
-          </select>
-          <span class="helper">If your exact size isn't listed, pick the closest one.</span>
-        </div>
+      <label>Waterfront (0 = No, 1 = Yes)</label>
+      <select name="waterfront" required>
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+      </select>
 
-        <div class="field">
-          <label for="zip_code">Zip Code</label>
-          <select id="zip_code" name="zip_code" required aria-required="true">
-            <option value="" disabled selected>Select zip code</option>
-            {% for zip_code in zip_codes %}
-              <option value="{{ zip_code }}">{{ zip_code }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <label>View (0–4)</label>
+      <select name="view" required>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
 
-        <div class="full actions">
-          <div style="flex:1" class="muted">Model: Ridge regression · Dataset: Seattle house prices</div>
-          <div style="display:flex;gap:8px">
-            <button id="predictBtn" type="submit" aria-live="polite">
-              <span id="btnLabel">Predict Price</span>
-              <span id="btnSpinner" style="display:none" class="spinner" aria-hidden="true"></span>
-            </button>
-          </div>
-        </div>
+      <label>Condition (1–5)</label>
+      <select name="condition" required>
+        <option value="1">1 (Poor)</option>
+        <option value="2">2</option>
+        <option value="3">3 (Average)</option>
+        <option value="4">4</option>
+        <option value="5">5 (Excellent)</option>
+      </select>
 
-        <div class="full">
-          <div id="predictedPrice" class="result" style="display:none" role="status" aria-live="polite"></div>
-        </div>
-      </form>
+      <label>Grade (1–13)</label>
+      <input type="number" name="grade" min="1" max="13" required>
 
-      <script>
-        (function(){
-          const form = document.getElementById('predictionForm');
-          const predictBtn = document.getElementById('predictBtn');
-          const btnLabel = document.getElementById('btnLabel');
-          const btnSpinner = document.getElementById('btnSpinner');
-          const resultBox = document.getElementById('predictedPrice');
+      <label>Year Built</label>
+      <input type="number" name="yr_built" min="1900" max="2025" required>
 
-          function setLoading(loading){
-            predictBtn.disabled = loading;
-            btnSpinner.style.display = loading ? 'inline-block' : 'none';
-            btnLabel.textContent = loading ? 'Predicting...' : 'Predict Price';
-            if(!loading) predictBtn.focus();
-          }
+      <label>Year Renovated (0 if never)</label>
+      <input type="number" name="yr_renovated" min="0" max="2025" required>
 
-          function showResult(text, isError=false){
-            resultBox.style.display = 'block';
-            resultBox.textContent = text;
-            if(isError){
-              resultBox.style.background = '#fff7f5';
-              resultBox.style.borderColor = '#fecaca';
-            } else {
-              resultBox.style.background = 'linear-gradient(180deg,#f8fafc,#f1f5f9)';
-              resultBox.style.borderColor = '#e2e8f0';
-            }
-          }
+      <label>Living Area (sqft)</label>
+      <input type="number" name="sqft_living" required>
 
-          function formatINR(value){
-            try{
-              const num = Number(value);
-              if(Number.isNaN(num)) return value;
-              return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
-            }catch(e){
-              return value;
-            }
-          }
+      <label>Lot Area (sqft)</label>
+      <input type="number" name="sqft_lot" required>
 
-          form.addEventListener('submit', async function(e){
-            e.preventDefault();
-            // Simple client-side validation
-            const beds = form.elements['beds'].value;
-            const baths = form.elements['baths'].value;
-            const size = form.elements['size'].value;
-            const zip = form.elements['zip_code'].value;
-            if(!beds || !baths || !size || !zip){
-              showResult('Please fill out all fields before predicting.', true);
-              return;
-            }
+      <label>Zip Code</label>
+      <input type="number" name="zipcode" required>
 
-            setLoading(true);
-            resultBox.style.display = 'none';
+      <button type="submit">Predict Price</button>
 
-            try {
-              const fd = new FormData(form);
-              const resp = await fetch('/predict', {
-                method: 'POST',
-                body: fd,
-                headers: {
-                  // Do not set content-type; let browser handle FormData
-                }
-              });
-
-              if(!resp.ok){
-                const text = await resp.text().catch(()=>resp.statusText);
-                throw new Error(text || `Server responded ${resp.status}`);
-              }
-
-              const text = await resp.text();
-              // Attempt to parse numeric prediction
-              let formatted = text;
-              const n = Number(text);
-              if(!Number.isNaN(n)){
-                formatted = formatINR(n);
-              } else if(text.trim()===''){
-                formatted = 'No prediction returned by server.';
-              }
-
-              showResult('Predicted price: ' + formatted);
-            } catch(err){
-              console.error('Prediction error:', err);
-              showResult('Error predicting price — ' + (err.message || 'network/server error'), true);
-            } finally {
-              setLoading(false);
-            }
-          });
-
-        })();
-      </script>
-    </main>
-
-    <footer>
-      <div>Built with Python · Flask · scikit-learn</div>
-      <div style="margin-top:6px;color:#9ca3af;font-size:.85rem;">Tip: run <code>python main.py</code> and open <strong>http://127.0.0.1:5000/</strong></div>
-    </footer>
+      <div class="result" id="result"></div>
+    </form>
   </div>
+
+  <script>
+    const form = document.getElementById('predictForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultDiv.innerHTML = "Predicting... ⏳";
+
+      const formData = new FormData(form);
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await response.text();
+        if (response.ok) {
+          const value = parseFloat(text);
+          if (!isNaN(value)) {
+            resultDiv.innerHTML = `💰 Predicted Price: ₹ ${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+          } else {
+            resultDiv.innerHTML = "⚠️ Unexpected response: " + text;
+          }
+        } else {
+          resultDiv.innerHTML = "❌ Error: " + text;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = "❌ Network error. Try again.";
+        console.error(error);
+      }
+    });
+  </script>
 </body>
 </html>
-          
-     
+               
 
         
     
