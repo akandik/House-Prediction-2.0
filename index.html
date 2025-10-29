@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>House Price Prediction</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #f9fafb, #eef2ff);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #eef2ff, #f9fafb);
       margin: 0;
       padding: 0;
     }
@@ -16,7 +16,7 @@
       margin: 40px auto;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
       padding: 30px;
     }
     h1 {
@@ -32,7 +32,8 @@
       font-weight: 600;
       color: #374151;
     }
-    input, select {
+    input,
+    select {
       width: 100%;
       padding: 10px;
       border-radius: 6px;
@@ -62,22 +63,24 @@
       color: #1e3a8a;
       font-size: 1.2rem;
     }
+    .error {
+      color: #b91c1c;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🏠 House Price Prediction</h1>
     <form id="predictForm">
-
       <label>Bedrooms</label>
-      <input type="number" name="bedrooms" min="0" required>
+      <input type="number" name="bedrooms" min="0" required />
 
       <label>Bathrooms</label>
-      <input type="number" step="0.25" name="bathrooms" min="0" required>
+      <input type="number" step="0.25" name="bathrooms" min="0" required />
 
       <label>Floors</label>
-      <input type="number" step="0.5" name="floors" min="1" required>
-
+      <input type="number" step="0.5" name="floors" min="1" required />
 
       <label>Condition (1–5)</label>
       <select name="condition" required>
@@ -89,13 +92,13 @@
       </select>
 
       <label>Living Area (sqft)</label>
-      <input type="number" name="sqft_living" required>
+      <input type="number" name="sqft_living" required />
 
       <label>Lot Area (sqft)</label>
-      <input type="number" name="sqft_lot" required>
+      <input type="number" name="sqft_lot" required />
 
       <label>Zip Code</label>
-      <input type="number" name="zipcode" required>
+      <input type="number" name="zipcode" required />
 
       <button type="submit">Predict Price</button>
 
@@ -104,41 +107,48 @@
   </div>
 
   <script>
-    const form = document.getElementById('predictForm');
-    const resultDiv = document.getElementById('result');
+    const API_URL = "https://your-backend-url.com/predict";
 
-    form.addEventListener('submit', async (e) => {
+    const form = document.getElementById("predictForm");
+    const resultDiv = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       resultDiv.innerHTML = "Predicting... ⏳";
+      resultDiv.classList.remove("error");
 
       const formData = new FormData(form);
       try {
-        const response = await fetch('/predict', {
-          method: 'POST',
-          body: formData
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: formData,
         });
 
         const text = await response.text();
         if (response.ok) {
           const value = parseFloat(text);
           if (!isNaN(value)) {
-            resultDiv.innerHTML = `💰 Predicted Price: ₹ ${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+            resultDiv.innerHTML =
+              "💰 Predicted Price: ₹ " +
+              value.toLocaleString("en-IN", { maximumFractionDigits: 0 });
           } else {
             resultDiv.innerHTML = "⚠️ Unexpected response: " + text;
+            resultDiv.classList.add("error");
           }
         } else {
           resultDiv.innerHTML = "❌ Error: " + text;
+          resultDiv.classList.add("error");
         }
       } catch (error) {
-        resultDiv.innerHTML = "❌ Network error. Try again.";
+        resultDiv.innerHTML =
+          "❌ Cannot connect to backend. Make sure your API URL is correct.";
+        resultDiv.classList.add("error");
         console.error(error);
       }
     });
   </script>
 </body>
 </html>
-               
-
         
     
   
