@@ -1,181 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>House Price Prediction</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #eef2ff, #f9fafb);
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 850px;
-      margin: 40px auto;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-      padding: 30px;
-    }
-    h1 {
-      text-align: center;
-      color: #111827;
-    }
-    form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    label {
-      font-weight: 600;
-      color: #374151;
-    }
-    input,
-    select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      background-color: #f8fafc;
-      font-size: 15px;
-    }
-    button {
-      grid-column: span 2;
-      background-color: #2563eb;
-      color: white;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background-color: #1d4ed8;
-    }
-    .result {
-      margin-top: 20px;
-      grid-column: span 2;
-      text-align: center;
-      font-weight: bold;
-      color: #1e3a8a;
-      font-size: 1.2rem;
-    }
-    .error {
-      color: #b91c1c;
-      font-weight: 600;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: #f5e7dc;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #54bce5;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #54bce5;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #222;
+        }
+
+        #predictedPrice {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+        }
+
+        footer {
+            background-color: #f97474;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🏠 House Price Prediction</h1>
-    <form id="predictForm">
-      <label>Bedrooms</label>
-      <input type="number" name="bedrooms" min="0" required />
+    <header>
+        <h1>🏠 House Price Prediction</h1>
+    </header>
+    <main>
+        <p><i>Enter details to predict your house price:</i></p>
 
-      <label>Bathrooms</label>
-      <input type="number" step="0.25" name="bathrooms" min="0" required />
+        <form id="predictionForm">
+            <label for="beds">Bedrooms:</label>
+            <select id="beds" name="beds"></select>
 
-      <label>Floors</label>
-      <input type="number" step="0.5" name="floors" min="1" required />
+            <label for="baths">Bathrooms:</label>
+            <select id="baths" name="baths"></select>
 
-      <label>Waterfront (0 = No, 1 = Yes)</label>
-      <select name="waterfront" required>
-        <option value="0">No</option>
-        <option value="1">Yes</option>
-      </select>
+            <label for="size">Size (sqft):</label>
+            <select id="size" name="size"></select>
 
-      <label>View (0–4)</label>
-      <select name="view" required>
-        <option value="0">0</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
+            <label for="zip_code">Zip Code:</label>
+            <select id="zip_code" name="zip_code"></select>
 
-      <label>Condition (1–5)</label>
-      <select name="condition" required>
-        <option value="1">1 (Poor)</option>
-        <option value="2">2</option>
-        <option value="3">3 (Average)</option>
-        <option value="4">4</option>
-        <option value="5">5 (Excellent)</option>
-      </select>
+            <button type="button" onclick="sendData()">Predict Price</button>
+        </form>
 
-      <label>Grade (1–13)</label>
-      <input type="number" name="grade" min="1" max="13" required />
+        <div id="predictedPrice"></div>
+    </main>
 
-      <label>Year Built</label>
-      <input type="number" name="yr_built" min="1900" max="2025" required />
+    <footer>
+        <p>&copy; 2025 House Price Prediction. All rights reserved.</p>
+    </footer>
 
-      <label>Year Renovated (0 if never)</label>
-      <input type="number" name="yr_renovated" min="0" max="2025" required />
-
-      <label>Living Area (sqft)</label>
-      <input type="number" name="sqft_living" required />
-
-      <label>Lot Area (sqft)</label>
-      <input type="number" name="sqft_lot" required />
-
-      <label>Zip Code</label>
-      <input type="number" name="zipcode" required />
-
-      <button type="submit">Predict Price</button>
-
-      <div class="result" id="result"></div>
-    </form>
-  </div>
-
-  <script>
-    // 👇 CHANGE THIS TO YOUR DEPLOYED FLASK URL
-    const API_URL = "https://your-backend-url.com/predict";
-
-    const form = document.getElementById("predictForm");
-    const resultDiv = document.getElementById("result");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      resultDiv.innerHTML = "Predicting... ⏳";
-      resultDiv.classList.remove("error");
-
-      const formData = new FormData(form);
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          body: formData,
-        });
-
-        const text = await response.text();
-        if (response.ok) {
-          const value = parseFloat(text);
-          if (!isNaN(value)) {
-            resultDiv.innerHTML =
-              "💰 Predicted Price: ₹ " +
-              value.toLocaleString("en-IN", { maximumFractionDigits: 0 });
-          } else {
-            resultDiv.innerHTML = "⚠️ Unexpected response: " + text;
-            resultDiv.classList.add("error");
-          }
-        } else {
-          resultDiv.innerHTML = "❌ Error: " + text;
-          resultDiv.classList.add("error");
+    <script>
+        // Generic function to populate dropdowns
+        async function fetchOptions(endpoint, dropdownId, placeholder) {
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                const dropdown = document.getElementById(dropdownId);
+                dropdown.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+                data.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    dropdown.appendChild(option);
+                });
+            } catch (err) {
+                console.error(`Error loading ${dropdownId}:`, err);
+            }
         }
-      } catch (error) {
-        resultDiv.innerHTML =
-          "❌ Cannot connect to backend. Make sure your API URL is correct.";
-        resultDiv.classList.add("error");
-        console.error(error);
-      }
-    });
-  </script>
+
+        // Load dropdowns on page load
+        window.onload = () => {
+            fetchOptions('/bedrooms', 'beds', 'Select number of bedrooms');
+            fetchOptions('/bathrooms', 'baths', 'Select number of bathrooms');
+            fetchOptions('/sizes', 'size', 'Select house size');
+            fetchOptions('/zip_codes', 'zip_code', 'Select zip code');
+        };
+
+        // Send user input to backend and display prediction
+        async function sendData() {
+            const form = document.getElementById('predictionForm');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json(); // Expect JSON like {price: 12345}
+                document.getElementById("predictedPrice").innerHTML =
+                    "Predicted Price: ₹ " + Number(result.price).toLocaleString();
+            } catch (error) {
+                document.getElementById("predictedPrice").innerHTML =
+                    "⚠️ Error getting prediction. Please try again.";
+                console.error(error);
+            }
+        }
+    </script>
 </body>
 </html>
-        
-    
   
                        
           
